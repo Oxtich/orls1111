@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>УВД по ЦАО — RMRP Система Баллов</title>
+    <style>
+        :root {
+            --bg-dark: #0f1319;
+            --panel-bg: #161b24;
+            --card-bg: #1c2330;
+            --input-bg: #242f41;
+            --text-gold: #e2b45c;
+            --text-light: #f0f4f8;
+            --police-blue: #2b5c8f;
+            --border-glow: rgba(43, 92, 143, 0.3);
+            
+            /* Цвета рангов УВД RMRP */
+            --rank-chief: #e53e3e;
+            --rank-deputy: #dd6b20;
+            --rank-sr-instr: #3182ce;
+            --rank-instr: #38a169;
+            --rank-trainee: #718096;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            padding: 30px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+        }
+
+        /* Шапка УВД по ЦАО */
+        .mvd-header {
+            background: linear-gradient(135deg, #111622 0%, #1c2436 100%);
+            border: 2px solid #2b384e;
+            border-bottom: 4px solid var(--police-blue);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mvd-header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, #d52b1e 0%, #ffffff 50%, #0039a6 100%);
+        }
+
+        .mvd-logo {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            display: inline-block;
+        }
+
+        .mvd-header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: var(--text-light);
+            text-transform: uppercase;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .mvd-subtitle {
+            color: #718096;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        /* Панель бюджета отдела */
+        .budget-panel {
+            background: var(--panel-bg);
+            border: 1px solid #2d3748;
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .budget-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            color: var(--text-gold);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .budget-input-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .budget-input {
+            background: var(--input-bg);
+            border: 1px solid #4a5568;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            width: 160px;
+            text-align: right;
+        }
+
+        .budget-stats {
+            font-size: 0.85rem;
+            color: #a0aec0;
+            background: rgba(0,0,0,0.2);
+            padding: 6px 12px;
+            border-radius: 4px;
+            border-left: 3px solid var(--text-gold);
+        }
+
+        /* Форма добавления сотрудника */
+        .mvd-form-box {
+            background: var(--panel-bg);
+            border: 1px solid #2d3748;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: #a0aec0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select {
+            background: var(--input-bg);
+            border: 1px solid #4a5568;
+            color: white;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--police-blue);
+            box-shadow: 0 0 8px var(--border-glow);
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-add {
+            background-color: var(--police-blue);
+            color: white;
+            width: 100%;
+            padding: 12px;
+            border-bottom: 3px solid #1a3a5f;
+        }
+
+        .btn-add:hover { background-color: #3b73b2; }
+
+        /* Список сотрудников */
+        .employee-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .employee-card {
+            background: var(--card-bg);
+            border: 1px solid #2d3748;
+            border-radius: 10px;
+            padding: 18px;
+            border-left: 6px solid var(--card-rank-color, #cbd5e0);
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .employee-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Привязка цветов рангов к карточкам */
+        .rank-chief { --card-rank-color: var(--rank-chief); }
+        .rank-deputy { --card-rank-color: var(--rank-deputy); }
+        .rank-sr-instr { --card-rank-color: var(--rank-sr-instr); }
+        .rank-instr { --card-rank-color: var(--rank-instr); }
+        .rank-trainee { --card-rank-color: var(--rank-trainee); }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .info-block {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .name-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .id-badge {
+            background: #111622;
+            color: #718096;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 3px 6px;
+            border-radius: 4px;
+            border: 1px solid #2d3748;
+        }
+
+        .employee-card h3 {
+            font-size: 1.2rem;
+            color: white;
+            font-weight: 700;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background-color: var(--card-rank-color);
+            width: max-content;
+        }
+
+        /* Блоки с цифрами */
+        .stats-wrapper {
+            display: flex;
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: #111622;
+            border: 1px solid #2d3748;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-align: center;
+            min-width: 90px;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            color: #718096;
+            margin-bottom: 2px;
+            font-weight: 700;
+        }
+
+        .stat-value {
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .value-points { color: #38a169; }
+        .value-money { color: var(--text-gold); }
+
+        /* Логи / История */
+        .history-box {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #a0aec0;
+            border-top: 1px dashed #2d3748;
+            padding-top: 10px;
+        }
+
+        .history-title {
+            font-weight: 700;
+            color: #718096;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        .history-list {
+            list-style: none;
+            max-height: 80px;
+            overflow-y: auto;
+        }
+
+        .history-list li {
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+        }
+
+        /* Кнопки действий */
+        .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .btn-score-up { background-color: #2f855a; color: white; }
+        .btn-score-up:hover { background-color: #276749; }
+
+        .btn-score-down { background-color: #9b2c2c; color: white; }
+        .btn-score-down:hover { background-color: #742a2a; }
+
+        .btn-edit { background-color: #2d3748; color: #cbd5e0; border: 1px solid #4a5568; }
+        .btn-edit:hover { background-color: #4a5568; }
+
+        .btn-delete { background-color: #742a2a; color: #fc8181; margin-left: auto; }
+        .btn-delete:hover { background-color: #9b2c2c; }
+
+        /* Модалка начисления баллов */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: var(--panel-bg);
+            border: 2px solid var(--police-blue);
+            padding: 25px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .modal h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #2d3748;
+            padding-bottom: 10px;
+            color: var(--text-light);
+        }
+
+        .modal-select {
+            width: 100%;
+            margin-top: 8px;
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Редактирование */
+        .edit-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .edit-fields select {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mvd-header">
+        <div class="mvd-logo">🦅</div>
+        <h1>УВД по ЦАО г. Москвы</h1>
+        <div class="mvd-subtitle">Система мониторинга состава и премирования (RMRP)</div>
+    </div>
+
+    <div class="budget-panel">
+        <div class="budget-title">💰 Общий призовой фонд отдела:</div>
+        <div class="budget-input-wrapper">
+            <input type="number" id="totalBudgetInput" class="budget-input" value="30000000" oninput="changeBudget()">
+            <span style="font-weight: 800; color: var(--text-gold);">₽</span>
+        </div>
+        <div class="budget-stats" id="budgetStatsText">
+            Всего баллов в отделе: 0 | Стоимость 1 балла: 0 ₽
+        </div>
+    </div>
+
+    <div class="mvd-form-box">
+        <div class="form-grid">
+            <div class="form-group" style="flex: 0.5;">
+                <label>ID жетона</label>
+                <input type="text" id="empId" placeholder="1024">
+            </div>
+            <div class="form-group">
+                <label>Фамилия</label>
+                <input type="text" id="lastName" placeholder="Иванов">
+            </div>
+            <div class="form-group">
+                <label>Имя</label>
+                <input type="text" id="firstName" placeholder="Иван">
+            </div>
+            <div class="form-group">
+                <label>Должность / Звание</label>
+                <select id="position">
+                    <option value="chief">Начальник</option>
+                    <option value="deputy">Зам начальника</option>
+                    <option value="sr-instr">Старший инструктор</option>
+                    <option value="instr">Инструктор</option>
+                    <option value="trainee">Стажер</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn btn-add" onclick="addEmployee()">➕ Внести сотрудника в личный состав</button>
+    </div>
+
+    <div class="employee-list" id="employeeList"></div>
+
+<div class="modal" id="scoreModal">
+    <div class="modal-content">
+        <h3 id="modalEmployeeName">Подать рапорт о работе</h3>
+        <div class="form-group">
+            <label>Выполненная служебная задача:</label>
+            <select id="taskSelect" class="modal-select">
+                <option value="10">Проведение собеседования (+10 б.)</option>
+                <option value="5">Помощь в собеседовании (+5 б.)</option>
+                <option value="15">Проведение лекции (+15 б.)</option>
+                <option value="15">Проведение экзамена (+15 б.)</option>
+                <option value="10">Принятие присяги (+10 б.)</option>
+                <option value="10">Провел экскурсию по УВД (+10 б.)</option>
+                <option value="20">Принял экзамен по практике задержания и ареста (+20 б.)</option>
+                <option value="10">Проверка рапорта у курсанта академии (+10 б.)</option>
+            </select>
+        </div>
+        <div class="modal-buttons">
+            <button class="btn btn-edit btn-small" onclick="closeModal()">Отмена</button>
+            <button class="btn btn-score-up btn-small" onclick="applyPoints()">Утвердить и начислить</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let employees = [];
+    let currentEmployeeId = null;
+    let totalBudget = 30000000;
+
+    const rankConfig = {
+        'chief': { order: 1, text: 'Начальник', class: 'rank-chief' },
+        'deputy': { order: 2, text: 'Зам начальника', class: 'rank-deputy' },
+        'sr-instr': { order: 3, text: 'Старший инструктор', class: 'rank-sr-instr' },
+        'instr': { order: 4, text: 'Инструктор', class: 'rank-instr' },
+        'trainee': { order: 5, text: 'Стажер', class: 'rank-trainee' }
+    };
+
+    // Загрузка сохраненных данных при старте
+    window.onload = function() {
+        const savedData = localStorage.getItem('mvd_database');
+        const savedBudget = localStorage.getItem('mvd_budget');
+        
+        if (savedData) {
+            employees = JSON.parse(savedData);
+        }
+        if (savedBudget) {
+            totalBudget = parseInt(savedBudget) || 30000000;
+            document.getElementById('totalBudgetInput').value = totalBudget;
+        }
+        updateUI();
+    };
+
+    function saveToLocalStorage() {
+        localStorage.setItem('mvd_database', JSON.stringify(employees));
+        localStorage.setItem('mvd_budget', totalBudget.toString());
+    }
+
+    function changeBudget() {
+        const val = parseInt(document.getElementById('totalBudgetInput').value);
+        totalBudget = isNaN(val) || val < 0 ? 0 : val;
+        saveToLocalStorage();
+        updateUI();
+    }
+
+    function addEmployee() {
+        const empId = document.getElementById('empId').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const firstName = document.getElementById('firstName').value.trim();
+        const position = document.getElementById('position').value;
+
+        if (!empId || !lastName || !firstName) {
+            alert('Заполните все поля служебной карточки (ID, Фамилия, Имя)!');
+            return;
+        }
+
+        // Проверка уникальности ID жетона
+        const idExists = employees.some(e => e.empId === empId);
+        if (idExists) {
+            alert(`Сотрудник с ID жетона ${empId} уже числится в составе УВД!`);
+            return;
+        }
+
+        const newEmployee = {
+            id: Date.now(),
+            empId: empId,
+            lastName: lastName,
+            firstName: firstName,
+            position: position,
+            score: 0,
+            history: [],
+            isEditing: false
+        };
+
+        employees.push(newEmployee);
+        
+        // Сброс полей
+        document.getElementById('empId').value = '';
+        document.getElementById('lastName').value = '';
+        document.getElementById('firstName').value = '';
+        document.getElementById('position').value = 'trainee';
+
+        saveToLocalStorage();
+        updateUI();
+    }
+
+    function updateUI() {
+        const listContainer = document.getElementById('employeeList');
+        listContainer.innerHTML = '';
+
+        // Расчет общей суммы баллов
+        const totalPoints = employees.reduce((sum, emp) => sum + emp.score, 0);
+        
+        // Расчет стоимости одного балла
+        const pointValue = totalPoints > 0 ? (totalBudget / totalPoints) : 0;
+
+        // Обновление строки статистики в панели бюджета
+        document.getElementById('budgetStatsText').innerText = 
+            `Всего баллов в отделе: ${totalPoints} | Стоимость 1 балла: ${Math.floor(pointValue).toLocaleString('ru-RU')} ₽`;
+
+        // Сортировка по табелю о рангах
+        employees.sort((a, b) => rankConfig[a.position].order - rankConfig[b.position].order);
+
+        employees.forEach(emp => {
+            const config = rankConfig[emp.position];
+            const currentPremia = Math.floor(emp.score * pointValue);
+            
+            const card = document.createElement('div');
+            card.className = `employee-card ${config.class}`;
+
+            if (emp.isEditing) {
+                card.innerHTML = `
+                    <div class="edit-fields">
+                        <input type="text" id="editId-${emp.id}" value="${emp.empId}" placeholder="ID">
+                        <input type="text" id="editLast-${emp.id}" value="${emp.lastName}" placeholder="Фамилия">
+                        <input type="text" id="editFirst-${emp.id}" value="${emp.firstName}" placeholder="Имя">
+                        <select id="editPos-${emp.id}">
+                            <option value="chief" ${emp.position === 'chief' ? 'selected' : ''}>Начальник</option>
+                            <option value="deputy" ${emp.position === 'deputy' ? 'selected' : ''}>Зам начальника</option>
+                            <option value="sr-instr" ${emp.position === 'sr-instr' ? 'selected' : ''}>Старший инструктор</option>
+                            <option value="instr" ${emp.position === 'instr' ? 'selected' : ''}>Инструктор</option>
+                            <option value="trainee" ${emp.position === 'trainee' ? 'selected' : ''}>Стажер</option>
+                        </select>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-score-up btn-small" onclick="saveEdit(${emp.id})">💾 Сохранить</button>
+                        <button class="btn btn-edit btn-small" onclick="toggleEdit(${emp.id})">Отмена</button>
+                    </div>
+                `;
+            } else {
+                let historyHTML = '';
+                if (emp.history.length > 0) {
+                    historyHTML = `
+                        <div class="history-box">
+                            <div class="history-title">Рапорты о выполнении задач:</div>
+                            <ul class="history-list">
+                                ${emp.history.map(item => `<li>• ${item}</li>`).reverse().join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="info-block">
+                            <div class="name-wrapper">
+                                <span class="id-badge">ID ${emp.empId}</span>
+                                <h3>${emp.lastName} ${emp.firstName}</h3>
+                            </div>
+                            <span class="rank-badge">${config.text}</span>
+                        </div>
+                        <div class="stats-wrapper">
+                            <div class="stat-box">
+                                <div class="stat-label">Баллы</div>
+                                <div class="stat-value value-points">${emp.score}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-label">Премия</div>
+                                <div class="stat-value value-money">${currentPremia.toLocaleString('ru-RU')} ₽</div>
+                            </div>
+                        </div>
+                    </div>
+                    ${historyHTML}
+                    <div class="actions">
+                        <button class="btn btn-score-up btn-small" onclick="openScoreModal(${emp.id})">⭐ Зачесть работу</button>
+                        <button class="btn btn-score-down btn-small" onclick="finePoints(${emp.id})">⚠ Выговор (-5 б.)</button>
+                        <button class="btn btn-edit btn-small" onclick="toggleEdit(${emp.id})">✏ Править</button>
+                        <button class="btn btn-delete btn-small" onclick="deleteEmployee(${emp.id})">🗑 Комиссовать</button>
+                    </div>
+                `;
+            }
+
+            listContainer.appendChild(card);
+        });
+    }
+
+    function toggleEdit(id) {
+        const emp = employees.find(e => e.id === id);
+        if (emp) {
+            emp.isEditing = !emp.isEditing;
+            updateUI();
+        }
+    }
+
+    function saveEdit(id) {
+        const emp = employees.find(e => e.id === id);
+        if (emp) {
+            const newId = document.getElementById(`editId-${id}`).value.trim();
+            const newLast = document.getElementById(`editLast-${id}`).value.trim();
+            const newFirst = document.getElementById(`editFirst-${id}`).value.trim();
+            const newPos = document.getElementById(`editPos-${id}`).value;
+
+            if (!newId || !newLast || !newFirst) {
+                alert('All fields are required!');
+                return;
+            }
+
+            const idExists = employees.some(e => e.empId === newId && e.id !== id);
+            if (idExists) {
+                alert(`ID ${newId} is already taken!`);
+                return;
+            }
+
+            emp.empId = newId;
+            emp.lastName = newLast;
+            emp.firstName = newFirst;
+            emp.position = newPos;
+            emp.isEditing = false;
+            saveToLocalStorage();
+            updateUI();
+        }
+    }
+
+    function deleteEmployee(id) {
+        if (confirm('Вы уверены, что хотите исключить сотрудника из личного состава УВД?')) {
+            employees = employees.filter(e => e.id !== id);
+            saveToLocalStorage();
+            updateUI();
+        }
+    }
+
+    function openScoreModal(id) {
+        currentEmployeeId = id;
+        const emp = employees.find(e => e.id === id);
+        document.getElementById('modalEmployeeName').innerText = `Рапорт по сотруднику: ${emp.lastName} (ID ${emp.empId})`;
+        document.getElementById('scoreModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('scoreModal').style.display = 'none';
+        currentEmployeeId = null;
+    }
+
+    function applyPoints() {
+        if (!currentEmployeeId) return;
+        
+        const emp = employees.find(e => e.id === currentEmployeeId);
+        const taskSelect = document.getElementById('taskSelect');
+        const selectedText = taskSelect.options[taskSelect.selectedIndex].text;
+        const points = parseInt(taskSelect.value) || 0;
+
+        if (emp) {
+            emp.score += points;
+            emp.history.push(`+${points} б. за ${selectedText.toLowerCase().replace(/ \(\+\d+ б\.\)/, '')}`);
+            closeModal();
+            saveToLocalStorage();
+            updateUI();
+        }
+    }
+
+    function finePoints(id) {
+        const emp = employees.find(e => e.id === id);
+        if (emp) {
+            emp.score = Math.max(0, emp.score - 5);
+            emp.history.push(`-5 б. Взыскание за нарушение дисциплины/устава`);
+            saveToLocalStorage();
+            updateUI();
+        }
+    }
+</script>
+
+</body>
+</html>
