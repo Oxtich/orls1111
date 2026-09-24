@@ -236,7 +236,6 @@
             box-shadow: 0 6px 15px rgba(0,0,0,0.3);
         }
 
-        /* Привязка цветов рангов к карточкам */
         .rank-chief { --card-rank-color: var(--rank-chief); }
         .rank-deputy { --card-rank-color: var(--rank-deputy); }
         .rank-sr-instr { --card-rank-color: var(--rank-sr-instr); }
@@ -292,7 +291,6 @@
             width: max-content;
         }
 
-        /* Блоки с цифрами */
         .stats-wrapper {
             display: flex;
             gap: 15px;
@@ -434,6 +432,7 @@
 </head>
 <body>
 
+<div class="container">
     <div class="mvd-header">
         <div class="mvd-logo">🦅</div>
         <h1>УВД по ЦАО г. Москвы</h1>
@@ -443,7 +442,7 @@
     <div class="budget-panel">
         <div class="budget-title">💰 Общий призовой фонд отдела:</div>
         <div class="budget-input-wrapper">
-            <input type="number" id="totalBudgetInput" class="budget-input" value="30000000" oninput="changeBudget()">
+            <input type="number" id="totalBudgetInput" class="budget-input" value="3000000" oninput="changeBudget()">
             <span style="font-weight: 800; color: var(--text-gold);">₽</span>
         </div>
         <div class="budget-stats" id="budgetStatsText">
@@ -469,7 +468,7 @@
                 <label>Должность / Звание</label>
                 <select id="position">
                     <option value="chief">Начальник</option>
-                    <option value="deputy">Зам начальника</option>
+                    <option value="deputy">Зам начальник</option>
                     <option value="sr-instr">Старший инструктор</option>
                     <option value="instr">Инструктор</option>
                     <option value="trainee">Стажер</option>
@@ -480,6 +479,7 @@
     </div>
 
     <div class="employee-list" id="employeeList"></div>
+</div>
 
 <div class="modal" id="scoreModal">
     <div class="modal-content">
@@ -487,14 +487,14 @@
         <div class="form-group">
             <label>Выполненная служебная задача:</label>
             <select id="taskSelect" class="modal-select">
-                <option value="10">Проведение собеседования (+10 б.)</option>
-                <option value="5">Помощь в собеседовании (+5 б.)</option>
-                <option value="15">Проведение лекции (+15 б.)</option>
-                <option value="15">Проведение экзамена (+15 б.)</option>
-                <option value="10">Принятие присяги (+10 б.)</option>
-                <option value="10">Провел экскурсию по УВД (+10 б.)</option>
-                <option value="20">Принял экзамен по практике задержания и ареста (+20 б.)</option>
-                <option value="10">Проверка рапорта у курсанта академии (+10 б.)</option>
+                <option value="3">Проведение собеседования (+3 б.)</option>
+                <option value="2">Помощь в собеседовании (+2 б.)</option>
+                <option value="5">Проведение лекции (+5 б.)</option>
+                <option value="5">Проведение экзамена (+5 б.)</option>
+                <option value="3">Принятие присяги (+3 б.)</option>
+                <option value="3">Провел экскурсию по УВД (+3 б.)</option>
+                <option value="7">Принял экзамен по практике задержания и ареста (+7 б.)</option>
+                <option value="3">Проверка рапорта у курсанта академии (+3 б.)</option>
             </select>
         </div>
         <div class="modal-buttons">
@@ -507,7 +507,7 @@
 <script>
     let employees = [];
     let currentEmployeeId = null;
-    let totalBudget = 30000000;
+    let totalBudget = 3000000;
 
     const rankConfig = {
         'chief': { order: 1, text: 'Начальник', class: 'rank-chief' },
@@ -517,16 +517,13 @@
         'trainee': { order: 5, text: 'Стажер', class: 'rank-trainee' }
     };
 
-    // Загрузка сохраненных данных при старте
     window.onload = function() {
         const savedData = localStorage.getItem('mvd_database');
         const savedBudget = localStorage.getItem('mvd_budget');
         
-        if (savedData) {
-            employees = JSON.parse(savedData);
-        }
+        if (savedData) { employees = JSON.parse(savedData); }
         if (savedBudget) {
-            totalBudget = parseInt(savedBudget) || 30000000;
+            totalBudget = parseInt(savedBudget) || 3000000;
             document.getElementById('totalBudgetInput').value = totalBudget;
         }
         updateUI();
@@ -555,7 +552,6 @@
             return;
         }
 
-        // Проверка уникальности ID жетона
         const idExists = employees.some(e => e.empId === empId);
         if (idExists) {
             alert(`Сотрудник с ID жетона ${empId} уже числится в составе УВД!`);
@@ -575,7 +571,6 @@
 
         employees.push(newEmployee);
         
-        // Сброс полей
         document.getElementById('empId').value = '';
         document.getElementById('lastName').value = '';
         document.getElementById('firstName').value = '';
@@ -589,17 +584,14 @@
         const listContainer = document.getElementById('employeeList');
         listContainer.innerHTML = '';
 
-        // Расчет общей суммы баллов
         const totalPoints = employees.reduce((sum, emp) => sum + emp.score, 0);
         
-        // Расчет стоимости одного балла
+        // Прямой расчет без скрытых коэффициентов (Бюджет / Баллы)
         const pointValue = totalPoints > 0 ? (totalBudget / totalPoints) : 0;
 
-        // Обновление строки статистики в панели бюджета
         document.getElementById('budgetStatsText').innerText = 
             `Всего баллов в отделе: ${totalPoints} | Стоимость 1 балла: ${Math.floor(pointValue).toLocaleString('ru-RU')} ₽`;
 
-        // Сортировка по табелю о рангах
         employees.sort((a, b) => rankConfig[a.position].order - rankConfig[b.position].order);
 
         employees.forEach(emp => {
@@ -617,7 +609,7 @@
                         <input type="text" id="editFirst-${emp.id}" value="${emp.firstName}" placeholder="Имя">
                         <select id="editPos-${emp.id}">
                             <option value="chief" ${emp.position === 'chief' ? 'selected' : ''}>Начальник</option>
-                            <option value="deputy" ${emp.position === 'deputy' ? 'selected' : ''}>Зам начальника</option>
+                            <option value="deputy" ${emp.position === 'deputy' ? 'selected' : ''}>Зам начальник</option>
                             <option value="sr-instr" ${emp.position === 'sr-instr' ? 'selected' : ''}>Старший инструктор</option>
                             <option value="instr" ${emp.position === 'instr' ? 'selected' : ''}>Инструктор</option>
                             <option value="trainee" ${emp.position === 'trainee' ? 'selected' : ''}>Стажер</option>
@@ -692,13 +684,13 @@
             const newPos = document.getElementById(`editPos-${id}`).value;
 
             if (!newId || !newLast || !newFirst) {
-                alert('All fields are required!');
+                alert('Все поля обязательны!');
                 return;
             }
 
             const idExists = employees.some(e => e.empId === newId && e.id !== id);
             if (idExists) {
-                alert(`ID ${newId} is already taken!`);
+                alert(`ID ${newId} уже занят!`);
                 return;
             }
 
@@ -759,6 +751,5 @@
         }
     }
 </script>
-
 </body>
 </html>
